@@ -72,3 +72,30 @@ within 250 words. Please provide the summary of the text along with headline in 
 
 
 
+
+
+# Save summary with headline to MongoDB
+def save_summary(youtube_url, headline, summary):
+    try:
+        document = {
+            "youtube_url": youtube_url,
+            "headline": headline,
+            "summary": summary,
+            "timestamp": datetime.now(),
+        }
+        summaries_collection.insert_one(document)
+        st.success("Summary saved to MongoDB.")  # explicitly show a success message
+    except Exception as e:
+        st.error(f"Error saving summary to MongoDB: {e}")
+
+# Fetch the latest summaries from MongoDB based on user selection
+def get_latest_saved_summaries(limit):
+    try:
+        results = summaries_collection.find().sort("timestamp", -1).limit(limit)
+        return list(results)
+    except Exception as e:
+        st.error(f"Error fetching summaries from MongoDB: {e}")
+        return []  # Return an empty list on error to avoid crashing the app
+
+
+
