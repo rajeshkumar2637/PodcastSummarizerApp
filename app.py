@@ -99,3 +99,63 @@ def get_latest_saved_summaries(limit):
 
 
 
+# Search summaries in MongoDB by headline
+def search_summaries_by_headline(search_query):
+    try:
+        results = summaries_collection.find({
+            "headline": {"$regex": search_query, "$options": "i"},  # Case-insensitive search by headline
+        })
+        return list(results)
+    except Exception as e:
+        st.error(f"Error searching summaries in MongoDB: {e}")
+        return []
+
+def extract_video_id(url):
+    """
+    Extracts the YouTube video ID from different URL formats.
+    Supports:
+    - https://www.youtube.com/watch?v=VIDEO_ID
+    - https://youtu.be/VIDEO_ID
+    """
+    pattern = r"(?:v=|\/)([0-9A-Za-z_-]{11})"
+    match = re.search(pattern, url)
+    if match:
+        return match.group(1)
+    return None
+
+
+
+
+
+
+def extract_transcript_details(video_id):
+    ytt_api = YouTubeTranscriptApi(
+    proxy_config=GenericProxyConfig(
+        http_url="http://uvmfwcbs-rotate:imui7uhheoxm@p.webshare.io:80",
+        https_url="http://uvmfwcbs-rotate:imui7uhheoxm@p.webshare.io:80",
+     )
+     
+     )
+    
+# all requests done by ytt_api will now be proxied using the defined proxy URLs
+    transcripts = ytt_api.list_transcripts(video_id)
+
+    # transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+    available_languages = [t.language_code for t in transcripts]
+    print(f"Available transcripts for video {video_id}: {available_languages}") # Removed st.info
+
+    for lang in ["en", "en-IN", "hi"]:
+            if lang in available_languages:
+                try:
+                    transcripts_lang = transcripts.find_transcript([lang])
+                    transcript_data = transcripts_lang.fetch()
+                    full_transcript = " ".join([item.text for item in transcript_data])
+                    print(f"✅ Retrieved transcript for {lang}") # Removed st.info
+                    return full_transcript
+                except Exception as e:
+                    print(f"❌ Error retrieving transcript for {lang}: {e}") # Removed st.error
+    raise ValueError(
+            f"No transcripts found in preferred languages. Available: {available_languages}"
+        )
+    
+
