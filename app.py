@@ -199,3 +199,47 @@ st.set_page_config(page_title="🎙️ Podcast Summary App", layout="centered")
 st.title("🎙️ Podcast Summarizer")
 st.subheader("Summarize & Search Any Podcast Instantly")
 
+
+
+
+
+
+# Search functionality for headlines
+search_query = st.text_input("🔍 Search by Headline:")
+if search_query:
+    st.subheader(f"Searching for summaries with headline containing: {search_query}")
+    results = search_summaries_by_headline(search_query)
+    if results:
+        st.subheader(f"Found {len(results)} result(s):")
+        for result in results:
+            st.markdown(f"### [Video URL]({result['youtube_url']})")
+            st.write(f"**Headline:** {result['headline']}")
+            st.write(f"**Summary:** {result['summary']}")
+            st.write(f"Timestamp: {result['timestamp']}")
+    else:
+        st.warning("No summaries found matching your search.")
+
+# Show Latest Saved Summaries Button & Select the number of summaries
+with st.expander("Show Latest Saved Summaries"):
+    # Add a slider to select the number of summaries to retrieve
+    num_summaries = st.slider(
+        "Select number of latest summaries to show", 1, 20, 10
+    )  # Default: 10, min: 1, max: 20
+    if st.button("📑 Show Latest Saved Summaries"):
+        with st.spinner(f"⏳ Fetching the latest {num_summaries} saved summaries..."):
+            try:
+                saved_summaries = get_latest_saved_summaries(num_summaries)
+                if saved_summaries:
+                    st.subheader(f"Showing the latest {num_summaries} saved summaries:")
+                    for summary in saved_summaries:
+                        st.markdown(f"### [Video URL]({summary['youtube_url']})")
+                        st.write(f"**Headline:** {summary['headline']}")
+                        st.write(f"**Summary:** {summary['summary']}")
+                        st.write(f"Timestamp: {summary['timestamp']}")
+                else:
+                    st.warning("No saved summaries found.")
+            except Exception as e:
+                st.error(f"❌ Error fetching saved summaries: {str(e)}")
+
+
+
