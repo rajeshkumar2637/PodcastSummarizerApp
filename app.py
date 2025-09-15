@@ -159,3 +159,43 @@ def extract_transcript_details(video_id):
         )
     
 
+
+
+
+def generate_gemini_content(transcript_text, prompt):
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    try:
+        
+        response = model.generate_content(prompt + transcript_text)
+        lines = response.text.split("\n", 1)
+        headline = lines[0] if len(lines) > 0 else "No headline available"
+        summary = lines[1] if len(lines) > 1 else "No summary available"
+        return headline, summary
+    except Exception as e:
+        st.error(f"❌ Error generating summary: {e}")
+        raise  # Re-raise to trigger retry
+
+
+
+
+# def generate_audio(response_text):
+#     try:
+#         audio_stream = client.text_to_speech.convert(
+#             text=response_text,
+#             voice_id="JBFqnCBsd6RMkjVDRZzb",
+#             model_id="eleven_multilingual_v2",
+#             output_format="mp3_44100_128",
+#         )
+#         print("audio is ready... now playing")
+#         audio_bytes = b"".join(audio_stream)  # Convert generator to bytes
+#         return audio_bytes
+#     except Exception as e:
+#         print(f"❌ Error generating audio: {e}")
+#         st.error(f"❌ Error generating audio.")
+#         raise RuntimeError(f"Failed to generate audio: {e}")
+
+# Streamlit app setup
+st.set_page_config(page_title="🎙️ Podcast Summary App", layout="centered")
+st.title("🎙️ Podcast Summarizer")
+st.subheader("Summarize & Search Any Podcast Instantly")
+
