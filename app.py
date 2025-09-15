@@ -243,3 +243,72 @@ with st.expander("Show Latest Saved Summaries"):
 
 
 
+
+
+# Paste YouTube Link
+youtube_link = st.text_input("🔗 Paste the podcast Link Below:")
+if youtube_link:
+    try:
+        video_id = extract_video_id(youtube_link)
+        thumbnail_url = f"http://img.youtube.com/vi/{video_id}/0.jpg"
+        st.image(thumbnail_url, use_column_width=True, caption="🎬 Video Preview")
+    except IndexError:
+        st.error("❌ Please enter a valid YouTube video link.")
+
+# Generate Summary with Headline and Optionally Save
+if st.button("📝 Generate Detailed Summary"):
+    with st.spinner("⏳ Extracting transcript and summarizing..."):
+        try:
+            transcript_text = extract_transcript_details(video_id)
+            if transcript_text:
+                headline, summary = generate_gemini_content(transcript_text, prompt)
+                # Show the summary
+                st.success("✅ Summary Generated!")
+                st.markdown("### 📄 Headline:")
+                st.markdown(f"**{headline}**")  # Display the headline
+                st.markdown("### 📄 Detailed Summary:")
+                st.markdown(summary)
+                save_summary(youtube_link, headline, summary)  # Save the headline and summary
+                # st.success("✅ Summary has been saved successfully!") # moved to the save_summary
+            else:
+                st.error("Failed to extract transcript.")
+
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}") # Show the last error
+
+# # Generate Voice Summary
+# if st.button("🎧 Generate Voice Summary"):
+#     with st.spinner("🎙️ Processing audio summary..."):
+#         try:
+#             # Extract transcript text from the YouTube link
+#             transcript_text = extract_transcript_details(video_id)
+#             if transcript_text:
+#                 # Generate the headline and summary using the Gemini model
+#                 headline, summary = generate_gemini_content(transcript_text, prompt)
+#                 if summary:
+#                     # Combine headline and summary
+#                     content_to_audio = f"{headline}\n\n{summary}"
+#                     # Generate audio for the combined content (headline + summary)
+#                     audio_data = generate_audio(content_to_audio)
+#                     # Display success message and audio player
+#                     st.markdown("### 📄 Headline:")
+#                     st.markdown(f"**{headline}**")  # Display the headline
+#                     st.markdown("### 📄 Detailed Summary:")
+#                     st.markdown(summary)
+#                     save_summary(youtube_link, headline, summary)
+#                     st.success("✅ Summary has been saved successfully!")
+#                     st.success("✅ Voice Summary Ready!")
+#                     st.markdown("### 🔊 Play Voice Summary Below:")
+#                     st.audio(audio_data, format="audio/mp3")
+#                 else:
+#                     st.warning("⚠️ No summary generated.")
+#             else:
+#                 st.warning("⚠️ No transcript available.")
+#         except Exception as e:
+#             st.error(f"❌ Error generating voice summary: {str(e)}") # Show the last error
+
+st.markdown("---")
+st.caption("✨ Built with ❤️ using Streamlit, Google Gemini, and ElevenLabs.")
+
+
+
